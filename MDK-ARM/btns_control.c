@@ -13,20 +13,20 @@ uint32_t adc_value_now = 0;
 uint32_t adc_ptr_now = 0;
 
 uint32_t shoot_time_ms_select[5]={
-		500,
+		10000,
 		1000,
 		2200, //default
 	  //2200, //default
-		10000,
-		15000
+		4000,
+		5000,
 };
 
 uint32_t wait_time_ms_seclect[5]={
-		2000,
 		5000,
+		4000,
 		3000, //default
-		15000,
-		20000
+		6000,
+		8000
 };
 
 uint32_t step_vertical_ms_select[5]={

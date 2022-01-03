@@ -231,17 +231,94 @@ bool STEPPER_CONTROLS_vertical_in_pos()
 	return true;
 }
  
-uint32_t speed_cnt=0;
+uint32_t speed_cntH=0;
+float deselerationH = 10;
+void deselerationH_exe(void);
+void deselerationH_exe(void)
+{
+	//simple accelaration decelartion
+	//horizontal
+	
+	
+	if (horizontal_to_step==horizontal_now_step)
+	{
+		if (deselerationH>2)
+			{
+				deselerationH-=0.5;
+			}
+	
+	}
+	else{
+			if ((horizontal_to_step-horizontal_now_step) >20)
+			{
+					if (deselerationH>2)
+					{
+						deselerationH-=0.5;
+					}
+			}
+			else if ((horizontal_to_step-horizontal_now_step) < 20)
+			{
+					if (deselerationH<10)
+					{
+						deselerationH+=0.5;
+					}
+			
+			}
+	
+	
+	}
+
+}
+
+uint32_t speed_cntV=0;
+float deselerationV = 10;
+void deselerationV_exe(void);
+void deselerationV_exe(void)
+{
+	//simple accelaration decelartion
+	//horizontal
+	
+	if (vertical_to_step==vertical_now_step)
+	{
+			if (deselerationV>2)
+			{
+				deselerationV-=0.5;
+			}
+	}
+	else{
+	
+		if ((vertical_to_step-vertical_now_step) >20)
+	{
+			if (deselerationV>2)
+			{
+				deselerationV-=0.5;
+			}
+	}
+	else if ((vertical_to_step-vertical_now_step) < 20)
+	{
+			if (deselerationV<10)
+			{
+				deselerationV+=0.5;
+			}
+	
+	}
+	
+	}
+
+}
+
+
 void STEPPER_CONTROLS_handler_1kHz(void)
 {
-	speed_cnt++;
-	if (speed_cnt>=2)
+	speed_cntH++;
+	if (speed_cntH>=deselerationH)
 	{
-		speed_cnt=0;
+		speed_cntH=0;
 	//steper home position 
 		if (home_horizontal>0)
 		{
 			home_horizontal--;
+			deselerationH_exe();
 			STEPPER_CONTROLS_ST1_DIR_CCW();
 			STEPPER_CONTROLS_ST1_ENABLE();
 			if (STEPPER_CONTROLS_END_HORIZONTAL())
@@ -250,6 +327,7 @@ void STEPPER_CONTROLS_handler_1kHz(void)
 				home_horizontal=0;
 				horizontal_now_step = 0;
 				horizontal_to_step = 0;
+				deselerationH = 10;
 				STEPPER_CONTROLS_ST1_DISABLE();
 			}
 			STEPPER_CONTROLS_ST1_STEP_TOGGLE();
@@ -259,6 +337,7 @@ void STEPPER_CONTROLS_handler_1kHz(void)
 			//vygdom zingius jei reikia
 			if (horizontal_to_step != horizontal_now_step)
 			{
+				deselerationH_exe();
 				horizontal_now_step++;
 				STEPPER_CONTROLS_ST1_DIR_CW();
 				STEPPER_CONTROLS_ST1_ENABLE();
@@ -271,15 +350,24 @@ void STEPPER_CONTROLS_handler_1kHz(void)
 		
 		}
 		
+		
+	}
+	
+	speed_cntV++;
+	if (speed_cntV>=deselerationV)
+	{
+		speed_cntV=0;
 		if (home_vertical>0)
 		{
 			home_vertical--;
+			deselerationV_exe();
 			STEPPER_CONTROLS_ST2_DIR_CCW();
 			STEPPER_CONTROLS_ST2_ENABLE();
 			if (STEPPER_CONTROLS_END_VERTICAL())
 			{
 				PRINTF("vertical home\r\n");
 				home_vertical=0;
+				deselerationV = 10;
 				vertical_now_step = 0;
 				vertical_to_step = 0;
 				STEPPER_CONTROLS_ST2_DISABLE();
@@ -291,6 +379,7 @@ void STEPPER_CONTROLS_handler_1kHz(void)
 			//vygdom zingius jei reikia
 			if (vertical_to_step != vertical_now_step)
 			{
+				deselerationV_exe();
 				vertical_now_step++;
 				STEPPER_CONTROLS_ST2_DIR_CW();
 				STEPPER_CONTROLS_ST2_ENABLE();
@@ -303,11 +392,8 @@ void STEPPER_CONTROLS_handler_1kHz(void)
 		
 		}
 		
-		
-		
-		
-		
 	}
+	
 	
 	
 	
