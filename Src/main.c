@@ -12,6 +12,9 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 
 
+TIM_HandleTypeDef htim1;
+static void MX_TIM1_Init(void);
+
 int main(void)
 {
 	
@@ -19,6 +22,9 @@ int main(void)
   SystemClock_Config();
 
   MX_GPIO_Init();
+	
+	MX_TIM1_Init();
+	
   BTNS_CONTROL_init();
 	
 	
@@ -46,7 +52,7 @@ uint32_t cnt_100hz;
 void system_tick_1khz(void)
 {
 	//sys tick 1khz
-	STEPPER_CONTROLS_handler_1kHz();
+	//STEPPER_CONTROLS_handler_1kHz();
 	
 	cnt_event++;
 	if (cnt_event>=500)
@@ -74,6 +80,75 @@ void system_tick_1khz(void)
 	}
 	
 
+}
+
+
+/**
+  * @brief TIM1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM1_Init(void)
+{
+
+  /* USER CODE BEGIN TIM1_Init 0 */
+
+  /* USER CODE END TIM1_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_SlaveConfigTypeDef sSlaveConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM1_Init 1 */
+
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 639; //100khz
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 19; //5khz
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+	
+	if (HAL_TIM_Base_Start_IT(&htim1) != HAL_OK)
+  {
+    /* Starting Error */
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM1_Init 2 */
+
+  /* USER CODE END TIM1_Init 2 */
+
+}
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @param  htim : TIM handle
+  * @retval None
+  */
+
+uint32_t counter_a = 0;
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	
+	STEPPER_CONTROLS_handler_5kHz();
+  counter_a++;
+	if (counter_a>5000)
+	{
+		counter_a=0;
+		//PRINTF("!");
+		
+		
+	}
 }
 
 

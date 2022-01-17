@@ -38,9 +38,11 @@
 #define STEPPER_CONTROLS_ST2_STEP_TOGGLE();	HAL_GPIO_TogglePin(ST2_STEP_GPIO_Port, ST2_STEP_Pin);
 
 
-
+void pack_to_bag(void);
+void measure_0(void);
 void STEPPER_CONTROLS_init(void);
 void STEPPER_CONTROLS_handler_1kHz(void);
+void STEPPER_CONTROLS_handler_5kHz(void);
 void STEPPER_CONTROLS_handler(void);
 
 void STEPPER_CONTROLS_set_start(uint32_t shoot_time_ms_,uint32_t wait_time_ms_, uint32_t step_vertical_, uint32_t step_horizontal_);

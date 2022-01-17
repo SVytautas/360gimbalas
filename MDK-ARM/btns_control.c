@@ -229,7 +229,7 @@ void BTNS_CONTROL_event_handler(uint8_t btn_event)
 			if (set_step == 4) //jeigu ant ready pradedam 
 			{
 				set_step++;
-				PRINTF("start sh:%u wai:%u ver:%u hor:%u\r\n",shoot_time_ms,wait_time_ms,step_vertical,step_horizontal );
+				//PRINTF("start sh:%u wai:%u ver:%u hor:%u\r\n",shoot_time_ms,wait_time_ms,step_vertical,step_horizontal );
 				BTNS_CONTROL_LED1_OFF();
 				BTNS_CONTROL_LED2_OFF();
 				BTNS_CONTROL_LED3_OFF();
@@ -239,6 +239,14 @@ void BTNS_CONTROL_event_handler(uint8_t btn_event)
 				
 			}
 			
+			break;
+			
+			case BTNS_CONTROL_BTN2_LONG:
+				pack_to_bag();
+			break;
+			
+			case BTNS_CONTROL_BTN1_LONG:
+				measure_0();
 			break;
 		
 		  default:

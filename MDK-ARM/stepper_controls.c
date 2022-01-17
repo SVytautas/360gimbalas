@@ -23,27 +23,39 @@ void STEPPER_CONTROLS_init(void)
 
 }
 
-int32_t cycle_to_exsecute = 0;
-int32_t cycle_state = 0;
+volatile int32_t cycle_to_exsecute = 0;
+volatile int32_t cycle_state = 0;
 
 
-uint32_t home_horizontal=0; //nustatom daugiau negu pilnas apsisukimas *2
+volatile uint32_t home_horizontal=0; //nustatom daugiau negu pilnas apsisukimas *2
 
-uint32_t horizontal_to_step = 0;
-uint32_t horizontal_now_step = 0;
+volatile uint32_t horizontal_to_step = 0;
+volatile uint32_t horizontal_now_step = 0;
 
-uint32_t horizontal_angle_steps = 0;
+volatile uint32_t horizontal_angle_steps = 0;
 //float horizontal_steps_angle = 0;
-float horizontal_steps_angle[5] = {0,0,0,0,0};
+volatile float horizontal_steps_angle[5] = {0,0,0,0,0};
 
-uint32_t home_vertical=0; //nustatom daugiau negu pilnas apsisukimas *2
+volatile uint32_t home_vertical=0; //nustatom daugiau negu pilnas apsisukimas *2
 
-uint32_t vertical_to_step = 0;
-uint32_t vertical_to_step2[6] = {0,90,90+780,90+780*2,90+780*3,90+780*4};
-uint32_t vertical_now_step = 0;
+volatile uint32_t vertical_to_step = 0;
+//117 vertikalus tai 72 36 0 36 72
+//72-117 = 45laipsniai 1 laipsnis = 21,6666 982
+#define angle_to_steps 21.66667f
+#define start_angle 55
+#define start_steps angle_to_steps*start_angle
 
-uint32_t vertical_angle_steps = 0;
-float vertical_steps_angle = 0;
+volatile uint32_t vertical_to_step2[6] = {
+0, //0
+start_steps, //72
+start_steps+780, //36
+start_steps+780*2, //0
+start_steps+780*3, //36
+start_steps+780*4}; //72
+volatile uint32_t vertical_now_step = 0;
+
+volatile uint32_t vertical_angle_steps = 0;
+volatile float vertical_steps_angle = 0;
 
 
 void STEPPER_CONTROLS_set_start(uint32_t shoot_time_ms_,uint32_t wait_time_ms_, uint32_t step_vertical_, uint32_t step_horizontal_)
@@ -81,6 +93,7 @@ void STEPPER_CONTROLS_set_start(uint32_t shoot_time_ms_,uint32_t wait_time_ms_, 
 }
 
 
+
 void STEPPER_CONTROLS_handler(void)
 {
 //while 
@@ -91,10 +104,9 @@ void STEPPER_CONTROLS_handler(void)
 						case 0:
 							//hominam asis
 							home_horizontal = STEPPER_CONTROLS_STEPS_HORIZONTAL_FULL * 2 + STEPPER_CONTROLS_STEPS_HORIZONTAL_FULL/3;
-							
 							//hominam vertikalia asi
 							home_vertical = STEPPER_CONTROLS_STEPS_HORIZONTAL_FULL * 2 + STEPPER_CONTROLS_STEPS_HORIZONTAL_FULL/3 ; //tiek pat kiek ir horiszontiala pilna apsisukima ir dar biskiai jei kas.
-							
+							//PRINTF("a");
 							cycle_state++;
 						break;
 						
@@ -232,7 +244,11 @@ bool STEPPER_CONTROLS_vertical_in_pos()
 }
  
 uint32_t speed_cntH=0;
-float deselerationH = 10;
+#define deseleration_H_max 4*5  //4ms
+#define deseleration_H_min 8  //2*5  //2ms //7per mazai 8ok gal
+#define deseleration_H_speed 0.0625f //labai gerai
+#define deseleartion_achievement_steps (deseleration_H_max-deseleration_H_min)/deseleration_H_speed
+float deselerationH = deseleration_H_max;
 void deselerationH_exe(void);
 void deselerationH_exe(void)
 {
@@ -240,27 +256,27 @@ void deselerationH_exe(void)
 	//horizontal
 	
 	
-	if (horizontal_to_step==horizontal_now_step)
+	if (home_horizontal>0)
 	{
-		if (deselerationH>2)
+		if (deselerationH>deseleration_H_min)
 			{
-				deselerationH-=0.5;
+				deselerationH-=deseleration_H_speed;
 			}
 	
 	}
 	else{
-			if ((horizontal_to_step-horizontal_now_step) >20)
+			if ((horizontal_to_step-horizontal_now_step) >deseleartion_achievement_steps)
 			{
-					if (deselerationH>2)
+					if (deselerationH>deseleration_H_min)
 					{
-						deselerationH-=0.5;
+						deselerationH-=deseleration_H_speed;
 					}
 			}
-			else if ((horizontal_to_step-horizontal_now_step) < 20)
+			else if ((horizontal_to_step-horizontal_now_step) < deseleartion_achievement_steps)
 			{
-					if (deselerationH<10)
+					if (deselerationH<deseleration_H_max)
 					{
-						deselerationH+=0.5;
+						deselerationH+=deseleration_H_speed;
 					}
 			
 			}
@@ -271,34 +287,38 @@ void deselerationH_exe(void)
 }
 
 uint32_t speed_cntV=0;
-float deselerationV = 10;
+#define deseleration_V_max 5*5  //4ms
+#define deseleration_V_min 2*5  //2*5  //paliekam leta nekazka ir reikia pajudeti
+#define deseleration_V_speed 0.0625f //
+#define deseleartion_Vachievement_steps (deseleration_V_max-deseleration_V_min)/deseleration_V_speed
+float deselerationV = deseleration_V_max;
 void deselerationV_exe(void);
 void deselerationV_exe(void)
 {
 	//simple accelaration decelartion
 	//horizontal
 	
-	if (vertical_to_step==vertical_now_step)
+	if (home_vertical>0)
 	{
-			if (deselerationV>2)
+			if (deselerationV>deseleration_V_min)
 			{
-				deselerationV-=0.5;
+				deselerationV-=deseleration_V_speed;
 			}
 	}
 	else{
 	
-		if ((vertical_to_step-vertical_now_step) >20)
+		if ((vertical_to_step-vertical_now_step) >deseleartion_Vachievement_steps)
 	{
-			if (deselerationV>2)
+			if (deselerationV>deseleration_V_min)
 			{
-				deselerationV-=0.5;
+				deselerationV-=deseleration_V_speed ;
 			}
 	}
-	else if ((vertical_to_step-vertical_now_step) < 20)
+	else if ((vertical_to_step-vertical_now_step) < deseleartion_Vachievement_steps)
 	{
-			if (deselerationV<10)
+			if (deselerationV<deseleration_V_max)
 			{
-				deselerationV+=0.5;
+				deselerationV+=deseleration_V_speed ;
 			}
 	
 	}
@@ -310,26 +330,36 @@ void deselerationV_exe(void)
 
 void STEPPER_CONTROLS_handler_1kHz(void)
 {
+	
+}
+
+
+void STEPPER_CONTROLS_handler_5kHz(void)
+{
 	speed_cntH++;
 	if (speed_cntH>=deselerationH)
 	{
 		speed_cntH=0;
+		//PRINTF("a");
 	//steper home position 
 		if (home_horizontal>0)
 		{
-			home_horizontal--;
-			deselerationH_exe();
-			STEPPER_CONTROLS_ST1_DIR_CCW();
-			STEPPER_CONTROLS_ST1_ENABLE();
-			if (STEPPER_CONTROLS_END_HORIZONTAL())
-			{
-				PRINTF("horizontal home\r\n");
-				home_horizontal=0;
-				horizontal_now_step = 0;
-				horizontal_to_step = 0;
-				deselerationH = 10;
-				STEPPER_CONTROLS_ST1_DISABLE();
-			}
+				home_horizontal--;
+				deselerationH_exe();
+				STEPPER_CONTROLS_ST1_DIR_CCW();
+				STEPPER_CONTROLS_ST1_ENABLE();
+				if (STEPPER_CONTROLS_END_HORIZONTAL())
+				//if (home_horizontal==0)
+				{
+					PRINTF("hor home\r\n");
+					home_horizontal=0;
+					horizontal_now_step = 0;
+					horizontal_to_step = 0;
+					deselerationH = deseleration_H_max;
+					STEPPER_CONTROLS_ST1_DISABLE();
+				}
+			
+			
 			STEPPER_CONTROLS_ST1_STEP_TOGGLE();
 		}
 		else
@@ -353,6 +383,7 @@ void STEPPER_CONTROLS_handler_1kHz(void)
 		
 	}
 	
+	//*
 	speed_cntV++;
 	if (speed_cntV>=deselerationV)
 	{
@@ -367,7 +398,7 @@ void STEPPER_CONTROLS_handler_1kHz(void)
 			{
 				PRINTF("vertical home\r\n");
 				home_vertical=0;
-				deselerationV = 10;
+				deselerationV = deseleration_V_max;
 				vertical_now_step = 0;
 				vertical_to_step = 0;
 				STEPPER_CONTROLS_ST2_DISABLE();
@@ -393,11 +424,46 @@ void STEPPER_CONTROLS_handler_1kHz(void)
 		}
 		
 	}
+	//*/
 	
 	
 	
 	
 
+}
+
+bool toggle_=true;
+
+void pack_to_bag(void)
+{
+	if (toggle_)
+	{
+		home_vertical = 7800*2;
+	}
+	else
+  {
+		vertical_to_step = (start_steps+780*4)*2;
+	}
+	
+toggle_ = !toggle_;	
+		
+}
+
+
+void measure_0(void)
+{
+	if (toggle_)
+	{
+		home_vertical = 7800*2;
+	}
+	else
+  {
+		vertical_to_step = (start_steps+780*2)*2;
+	}
+	toggle_ = !toggle_;	
+	
+		
+		
 }
 
 
