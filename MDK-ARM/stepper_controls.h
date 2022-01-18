@@ -2,10 +2,26 @@
 #include "stdint.h"
 #include "stdbool.h"
 
+
+#define SIZE_STEPS_ARR_MAX 64
+
+typedef struct
+{
+	uint32_t vertical_steps_size;
+	float vertical_degs_pozs[SIZE_STEPS_ARR_MAX]; //vertikalios pozicijos 0 atkaitos -90;0;90 iki 64
+	float horizontal_counts_pozs[SIZE_STEPS_ARR_MAX]; //horizontalios pozicijos counteriai kiek kiekviename vertikaliame
+	
+  uint32_t horizontal_steps_pozs_temp[SIZE_STEPS_ARR_MAX];
+  uint32_t vertical_steps_pozs_temp[SIZE_STEPS_ARR_MAX];	
+}vert_horz_t;
+
+
+
 //#define STEPPER_CONTROLS_STEPS_HORIZONTAL_FULL 1200   //100hz skaitimas
 //#define STEPPER_CONTROLS_STEPS_HORIZONTAL_FULL 1200*6   //100hz skaitimas
 #define STEPPER_CONTROLS_STEPS_HORIZONTAL_FULL 7800   //100hz skaitimas
-#define STEPPER_CONTROLS_STEPS_VERTICAL_FULL 430  //100hz skaitimas 2sekundes
+#define DEG_STEPS (float)STEPPER_CONTROLS_STEPS_HORIZONTAL_FULL/360.0f
+//#define STEPPER_CONTROLS_STEPS_VERTICAL_FULL 430  //100hz skaitimas 2sekundes
 //#define STEPPER_CONTROLS_STEPS_VERTICAL_MIDLE 288
 
 
