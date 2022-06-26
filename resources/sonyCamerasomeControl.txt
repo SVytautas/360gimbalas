@@ -1,0 +1,11 @@
+Photo     740239    B4B8F   // Shutter | take photo
+VID       76687     12B8F   // Start | stop video recording
+DISP      166799    28B8F   // Display change cycles round
+Menu      117647    1CB8F   // Enter menu | leave menu
+MenuU     379791    5CB8F   // Menu up
+menuD     904079    DCB8F   // Menu down
+menuR     1035151   FCB8F   // Menu right
+menuL     510863    7CB8F   // Menu left
+OK        641937    9CB91   // Menu OK
+Z+        338831    52B8F   // Zoom in
+Z-        863119    D2B8F   // Zoom out
