@@ -419,6 +419,11 @@
               <FileType>1</FileType>
               <FilePath>.\stepper_controls.c</FilePath>
             </File>
+            <File>
+              <FileName>IR_control.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\IR_control.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

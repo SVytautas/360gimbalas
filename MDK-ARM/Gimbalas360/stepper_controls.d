@@ -32,3 +32,4 @@
 .\gimbalas360\stepper_controls.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 .\gimbalas360\stepper_controls.o: btns_control.h
 .\gimbalas360\stepper_controls.o: stepper_controls.h
+.\gimbalas360\stepper_controls.o: IR_control.h

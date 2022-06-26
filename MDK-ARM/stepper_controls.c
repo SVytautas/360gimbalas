@@ -2,6 +2,7 @@
 #include "uart2_dbg.h"
 #include "btns_control.h"
 #include "stepper_controls.h"
+#include "IR_control.h"
 
 #define ZIGZAG 1
 
@@ -40,11 +41,19 @@ volatile uint32_t vertical_angle_steps = 0;
 #define ANGLE_TO_ZERO 37
 
 
-
+/* 28mm full frame 35coverage
 vert_horz_t vert_horz_control={
 	.vertical_steps_size = 5,
 	.vertical_degs_pozs = {-72,-36,0,36,72},
 	.horizontal_counts_pozs = {4,10,12,10,4},
+};
+*/
+
+//fisheye
+vert_horz_t vert_horz_control={
+	.vertical_steps_size = 3,
+	.vertical_degs_pozs = {-75,0,75},
+	.horizontal_counts_pozs = {2,7,2},
 };
 
 
@@ -245,6 +254,12 @@ void STEPPER_CONTROLS_handler(void)
 							case 6:
 						//fotkiname viena nuotrauka
 						//shotter realise 
+						SonyShotNow();
+						HAL_Delay(5);
+						SonyShotNow();
+						HAL_Delay(5);
+						SonyShotNow();
+						///*
 						HAL_GPIO_WritePin(Cam_Realise_GPIO_Port, Cam_Realise_Pin, GPIO_PIN_RESET);
 						HAL_GPIO_WritePin(Cam_Focus_GPIO_Port, Cam_Focus_Pin, GPIO_PIN_RESET);
 						HAL_Delay(50);
@@ -253,10 +268,11 @@ void STEPPER_CONTROLS_handler(void)
 						HAL_Delay(300);
 						HAL_GPIO_WritePin(Cam_Realise_GPIO_Port, Cam_Realise_Pin, GPIO_PIN_RESET);
 						HAL_GPIO_WritePin(Cam_Focus_GPIO_Port, Cam_Focus_Pin, GPIO_PIN_RESET);
-						//
+						///*/
 						PRINTF("H shoot pos %u\r\n",horizontal_to_step/2);
 						//laukiame fotkinimo laika
 						HAL_Delay(shoot_time_ms2);
+						//	*/
 							
 						horizontal_angle_steps++; //incrementinam 	
 						cycle_state=4; //reapeat horizontal poz 
@@ -297,7 +313,8 @@ bool STEPPER_CONTROLS_vertical_in_pos()
  
 uint32_t speed_cntH=0;
 #define deseleration_H_max 4*5  //4ms
-#define deseleration_H_min 8  //2*5  //2ms //7per mazai 8ok gal
+//#define deseleration_H_min 8  //2*5  //2ms //7per mazai 8ok gal
+#define deseleration_H_min 11  //2*5  //2ms //7per mazai 8ok gal
 #define deseleration_H_speed 0.0625f //labai gerai
 #define deseleartion_achievement_steps (deseleration_H_max-deseleration_H_min)/deseleration_H_speed
 float deselerationH = deseleration_H_max;
@@ -368,7 +385,12 @@ void deselerationH_exe(void)
 
 uint32_t speed_cntV=0;
 #define deseleration_V_max 5*5  //4ms
-#define deseleration_V_min 2*5  //2*5  //paliekam leta nekazka ir reikia pajudeti
+//#define deseleration_V_min 2*5  //2*5  //paliekam leta nekazka ir reikia pajudeti
+#define deseleration_V_min 11
+
+
+
+//2*5  //paliekam leta nekazka ir reikia pajudeti
 #define deseleration_V_speed 0.0625f //
 #define deseleartion_Vachievement_steps (deseleration_V_max-deseleration_V_min)/deseleration_V_speed
 float deselerationV = deseleration_V_max;
